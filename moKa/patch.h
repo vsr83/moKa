@@ -25,9 +25,10 @@
 
 class Patch {
 public:
-    Patch(Waveform &_waveform,
-          Envelope &_envelope,
-          Modulation &_modulation);
+    Patch(Waveform   &_waveform,
+          Envelope   &_envelope,
+          Modulation &_modulation,
+          Filter     &_filter);
     ~Patch();
 
     void trigger(double _frequency,
@@ -41,9 +42,12 @@ public:
 
     double eval(double t,
                 bool withEnvelope = true);
+    bool hasFilter();
 
     unsigned char note;
     unsigned char vel;
+
+    Filter     filter;
 private:
     double frequency;
     double amplitude;
@@ -52,7 +56,6 @@ private:
     Waveform   waveform;
     Envelope   envelope;
     Modulation modulation;
-    Filter     filter;
 };
 
 #endif // PATCH_H

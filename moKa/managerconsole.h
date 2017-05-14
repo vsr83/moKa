@@ -25,6 +25,7 @@
 #include "waveform.h"
 #include "modulation.h"
 #include "envelope.h"
+#include "effect.h"
 
 #include <vector>
 #include <list>
@@ -66,6 +67,7 @@ private:
 
     std::vector<Patch> activePatches;
     std::vector<std::list<Patch> > activeSounds;
+    std::vector<Effect> channelEffects;
 };
 
 #endif // MANAGERCONSOLE_H

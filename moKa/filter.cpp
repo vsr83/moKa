@@ -130,6 +130,7 @@ Filter::Filter(unsigned int _type,
         }
 
         IR[ind_n] = v;
+        std::cout << ind_n << " " << v << std::endl;
     }
 }
 
@@ -160,8 +161,6 @@ Filter::operator =(const Filter &filter) {
         delete IR;
         IR = 0;
     }
-    IR = new double[size];
-    std::copy(filter.IR, filter.IR + size, IR);
 
     size         = filter.size;
     type         = filter.type;
@@ -170,6 +169,12 @@ Filter::operator =(const Filter &filter) {
     fftTimer     = filter.fftTimer;
     freq1        = filter.freq1;
     freq2        = filter.freq2;
+
+    IR = new double[size];
+    std::copy(filter.IR, filter.IR + size, IR);
+
+    for (unsigned int ind = 0 ; ind < size; ind++)
+        std::cout << "- " << ind << " " << filter.IR[ind] << " " << IR[ind] << std::endl;
 
     return *this;
 }

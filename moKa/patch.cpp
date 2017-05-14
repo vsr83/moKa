@@ -21,10 +21,12 @@
 
 Patch::Patch(Waveform &_waveform,
              Envelope &_envelope,
-             Modulation &_modulation) {
+             Modulation &_modulation,
+             Filter     &_filter) {
     waveform   = _waveform;
     envelope   = _envelope;
     modulation = _modulation;
+    filter     = _filter;
 
     frequency = 0.0;
     amplitude = 0.0;
@@ -89,4 +91,9 @@ Patch::eval(double t,
     //std::cout << t - initialTime << " " << out << std::endl;
 
     return out;
+}
+
+bool
+Patch::hasFilter() {
+    return filter.type != Filter::FILTER_OFF;
 }

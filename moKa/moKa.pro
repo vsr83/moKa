@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     RtMIDIInterface.cpp \
     AudioInterface.cpp \
     managerconsole.cpp \
-    filter.cpp
+    filter.cpp \
+    effect.cpp
 
 HEADERS  += mainwindow.h \
     patch.h \
@@ -34,7 +35,8 @@ HEADERS  += mainwindow.h \
     RtMIDIInterface.h \
     AudioInterface.h \
     managerconsole.h \
-    filter.h
+    filter.h \
+    effect.h
 
 DISTFILES += \
     README.md

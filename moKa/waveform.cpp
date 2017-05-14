@@ -154,8 +154,6 @@ Waveform::eval(double t) {
 
     double value_next, value_prev;
 
-//    std::cout << ind_min <<  " " <<ind_max << std::endl;
-
     if (ind_min == ind_max) {
         return waveTable[ind_min];
     } else if (ind_max == tableSize) {

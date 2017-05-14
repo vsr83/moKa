@@ -25,15 +25,17 @@ ManagerConsole::ManagerConsole() {
 
     for (unsigned int channel = 0; channel < 16; channel++) {
         std::list<Patch> patchlist;
-        Waveform   waveform(Waveform::MODE_SQU);
+        Waveform   waveform(Waveform::MODE_SAW);
         Modulation modulation;
         Envelope   envelope;
-        Patch patch(waveform, envelope, modulation);
+        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 32, 44100, 1000.0);
+        Patch patch(waveform, envelope, modulation, filter);
+        Effect     effect;
 
         activeSounds.push_back(patchlist);
         activePatches.push_back(patch);
+        channelEffects.push_back(effect);
     }
-    std::cout <<"L" <<  this << std::endl;
 }
 
 void
@@ -90,8 +92,6 @@ ManagerConsole::generateCallback(double t,
                                  void *userData) {
     ManagerConsole *manager = (ManagerConsole *) userData;
 
-//    std::cout << "GEN start " << userData << std::endl;
-
     float *outputMono = new float[numSamples];
 
     for (unsigned int sample = 0; sample < numSamples; sample++) {
@@ -101,6 +101,11 @@ ManagerConsole::generateCallback(double t,
     double currentTime = manager->getCurrentTime();
 
     for (unsigned int channel = 0; channel < 16; channel++) {
+        float *channelOutput = new float[numSamples];
+        for (unsigned int sample = 0; sample < numSamples; sample++) {
+            channelOutput[sample] = 0.0;
+        }
+
         for (std::list<Patch>::iterator it = manager->activeSounds[channel].begin(); it != manager->activeSounds[channel].end();) {
             if ((*it).isFinished()) {
                 manager->activeSounds[channel].erase(it++);
@@ -108,12 +113,24 @@ ManagerConsole::generateCallback(double t,
                 double t = currentTime;
 
                 for (unsigned int sample = 0; sample < numSamples; sample++) {
-                    outputMono[sample] += 0.1 * (*it).eval(t);
+                    channelOutput[sample] += 0.1 * (*it).eval(t);
                     t += dt;
                 }
                 ++it;
             }
         }
+        manager->channelEffects[channel].filterRBAddData(channelOutput, numSamples);
+        if (manager->activePatches[channel].hasFilter()) {
+            manager->channelEffects[channel].filterConvolve(&manager->activePatches[channel].filter,
+                                                            channelOutput,
+                                                            numSamples);
+        }
+
+        for (unsigned int sample = 0; sample < numSamples; sample++) {
+            outputMono[sample] += channelOutput[sample];
+        }
+        delete [] channelOutput;
+        channelOutput = 0;
     }
 
     std::copy(outputMono, outputMono + numSamples, outputLeft);
