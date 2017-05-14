@@ -25,12 +25,12 @@ ManagerConsole::ManagerConsole() {
 
     for (unsigned int channel = 0; channel < 16; channel++) {
         std::list<Patch> patchlist;
-        Waveform   waveform(Waveform::MODE_SQU);
+        Waveform   waveform(Waveform::MODE_TRI);
         Modulation modulation;
         Envelope   envelope;
-        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 1000.0);
+        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 400.0*channel);
         Patch patch(waveform, envelope, modulation, filter);
-        Effect     effect;
+        Effect     effect(44100, 44100*10, true);
 
         activeSounds.push_back(patchlist);
         activePatches.push_back(patch);
@@ -124,6 +124,13 @@ ManagerConsole::generateCallback(double t,
             manager->channelEffects[channel].filterConvolve(&manager->activePatches[channel].filter,
                                                             channelOutput,
                                                             numSamples);
+            if (manager->channelEffects[channel].delayEnabled) {
+                manager->channelEffects[channel].delayRBAddData(channelOutput,
+                                                                numSamples);
+
+                manager->channelEffects[channel].delayRBapply(channelOutput,
+                                                              numSamples);
+            }
         }
 
         for (unsigned int sample = 0; sample < numSamples; sample++) {

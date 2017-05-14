@@ -139,14 +139,14 @@ RtMIDIInterface::RtCallback(double deltaTime,
         }
 
         if (func >= 128 && func <= 143) {
-            unsigned char channel = func - 127;
+            unsigned char channel = func - 128;
             unsigned char note    = data1;
 
             if (iface->noteOffCallbackEnabled)
                 (*iface->_noteOffCallback)(channel, note, iface->noteOffUserData);
         }
         if (func >= 144 && func <= 159) {
-            unsigned char channel = func - 143;
+            unsigned char channel = func - 144;
             unsigned char note    = data1;
             unsigned char velocity= data2;
 
