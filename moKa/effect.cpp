@@ -46,9 +46,17 @@ Effect::filterConvolve(Filter *filter,
     }
     RBindex += filterRBIndex - datasize + 1;
 
+    bool zerodata = true;
+    for (unsigned int dataInd = 0; dataInd < datasize; dataInd++) {
+        outputData[dataInd] = 0;
+        unsigned int inputIndex = (RBindex + dataInd) % filterRBSize;
+        if (filterRB[inputIndex] != 0.0) zerodata = false;
+    }
+
+    if (zerodata) return;
+
     for (unsigned int dataInd = 0; dataInd < datasize; dataInd++) {
 
-        outputData[dataInd] = 0;
         unsigned int inputIndex = (RBindex + dataInd) % filterRBSize;
       //  outputData[dataInd] = filterRB[inputIndex];
 

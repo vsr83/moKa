@@ -25,10 +25,10 @@ ManagerConsole::ManagerConsole() {
 
     for (unsigned int channel = 0; channel < 16; channel++) {
         std::list<Patch> patchlist;
-        Waveform   waveform(Waveform::MODE_SAW);
+        Waveform   waveform(Waveform::MODE_SQU);
         Modulation modulation;
         Envelope   envelope;
-        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 32, 44100, 1000.0);
+        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 1000.0);
         Patch patch(waveform, envelope, modulation, filter);
         Effect     effect;
 
