@@ -23,8 +23,33 @@ class Modulation
 {
 public:
     Modulation();
-    double eval(double t,
-                double velocity);
+    double eval(double wavefreq,
+                double t,
+                double velocity,
+                double envelope);
+
+    enum {
+        FM_OFF,
+        FM_DIRECT,
+        FM_PROP_FREQ,
+    };
+    enum{
+        AM_OFF,
+        AM_DIRECT,
+        AM_PROP_VEL
+    };
+
+    unsigned int FMmode;
+    unsigned int AMmode;
+
+    double FMfreqCoeff;
+    double FMfreqRaw;
+    double FMampl;
+
+    double AMfreq;
+    double AMfreqRaw;
+
+    bool FMpropVel;
 };
 
 #endif // MODULATION_H

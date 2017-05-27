@@ -62,7 +62,7 @@ Waveform::Waveform(unsigned int _mode,
     } else {
         waveTable = new double[tableSize];
 
-        for (unsigned int indSample; indSample < tableSize; indSample++) {
+        for (unsigned int indSample = 0; indSample < tableSize; indSample++) {
             double angle = ((double) indSample) * 2.0 * M_PI / tableSizeFloat;
 
             switch(mode) {
@@ -82,6 +82,38 @@ Waveform::Waveform(unsigned int _mode,
         }
     }
 }
+
+void
+Waveform::recreateWithTimbre(std::vector<double> &timbreAmplitudes,
+                             std::vector<double> &timbreCoefficients) {
+    assert(timbreAmplitudes.size() == timbreCoefficients.size());
+
+    for (unsigned int indSample; indSample < tableSize; indSample++)
+        waveTable[indSample] = 0.0;
+
+    for (unsigned int indTimbre = 0; indTimbre < timbreAmplitudes.size(); indTimbre++) {
+
+        for (unsigned int indSample = 0; indSample < tableSize; indSample++) {
+            double angle = ((double) indSample) * 2.0 * timbreCoefficients[indTimbre] * M_PI / tableSizeFloat;
+
+            switch(mode) {
+            case MODE_SIN:
+                waveTable[indSample] += evalSin(angle) * timbreAmplitudes[indTimbre];
+                break;
+            case MODE_TRI:
+                waveTable[indSample] += evalTri(angle) * timbreAmplitudes[indTimbre];
+                break;
+            case MODE_SAW:
+                waveTable[indSample] += evalSaw(angle) * timbreAmplitudes[indTimbre];
+                break;
+            case MODE_SQU:
+                waveTable[indSample] += evalSqu(angle) * timbreAmplitudes[indTimbre];
+                break;
+            }
+        }
+    }
+}
+
 
 Waveform::~Waveform() {
     if (mode != MODE_WAV) {

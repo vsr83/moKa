@@ -18,6 +18,7 @@
 #include "patch.h"
 #include <math.h>
 #include <iostream>
+#include <assert.h>
 
 Patch::Patch(Waveform &_waveform,
              Envelope &_envelope,
@@ -30,6 +31,9 @@ Patch::Patch(Waveform &_waveform,
 
     frequency = 0.0;
     amplitude = 0.0;
+
+    timbreAmplitudes = {1.0};
+    timbreCoefficients = {1.0};
 }
 
 Patch::~Patch() {
@@ -75,25 +79,36 @@ Patch::isFinished() {
 double
 Patch::eval(double t,
             bool withEnvelope) {
-    double envelopeValue = 1.0;
-    double modulatedTime = modulation.eval((t - initialTime) * 2 * M_PI * frequency, amplitude);
+    assert(timbreAmplitudes.size() == timbreCoefficients.size());
 
-    //modulatedTime = (t - initialTime);
+    double envelopeValue = envelope.eval(t);
+    double patchTime = t - initialTime;
+    double out = 0.0;
 
-    double out = waveform.eval(modulatedTime);
+    // Perform linear and / or FM synthesis:
+    for (unsigned int indTimbre = 0; indTimbre < timbreAmplitudes.size(); indTimbre++) {
+        double modulatedTime = modulation.eval(frequency * timbreCoefficients[indTimbre],
+                                               patchTime,
+                                               amplitude * timbreAmplitudes[indTimbre],
+                                               envelopeValue);
+        out += timbreAmplitudes[indTimbre] * waveform.eval(modulatedTime);
+    }
 
-   // std::cout << out << std::endl;
     if (withEnvelope)
-        out *= envelope.eval(t);
-
-    //out = amplitude * sin(frequency * (t - initialTime));
-
-    //std::cout << t - initialTime << " " << out << std::endl;
-
+        out *= envelopeValue;
     return out;
 }
 
 bool
 Patch::hasFilter() {
     return filter.type != Filter::FILTER_OFF;
+}
+
+void
+Patch::setTimbre(std::vector<double> &_timbreAmplitudes,
+                 std::vector<double> &_timbreCoefficients) {
+    assert(_timbreAmplitudes.size() == _timbreCoefficients.size());
+
+    timbreAmplitudes = _timbreAmplitudes;
+    timbreCoefficients = _timbreCoefficients;
 }

@@ -20,8 +20,8 @@ Effect::Effect(unsigned int _filterRBSize,
         delayRB[RBind] = 0.0;
 
     delayEnabled = _delayEnabled;
-    delayStep = 4096*2;
-    delayFac = 0.25;
+    delayStep = 4096;
+    delayFac = 0.5;
     numDelaySteps = 10;
 }
 

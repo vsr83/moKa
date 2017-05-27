@@ -67,10 +67,12 @@ public:
                                 void *userData);
 
     void openPort(unsigned int port);
+    void openPort(std::string name);
     void closePort();
 
     unsigned int getNumberOfPorts();
     std::string getPortName(unsigned int port);
+    std::string getCurrentPortName();
 
     bool getPortOpen();
     unsigned int getCurrentPort();
@@ -94,6 +96,7 @@ private:
     void *channelModeUserData;
 
     std::vector<std::string> portNames;
+    std::string  activePortName;
     unsigned int activePort;
     bool portOpen;
 };

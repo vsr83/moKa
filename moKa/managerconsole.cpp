@@ -25,17 +25,29 @@ ManagerConsole::ManagerConsole() {
 
     for (unsigned int channel = 0; channel < 16; channel++) {
         std::list<Patch> patchlist;
-        Waveform   waveform(Waveform::MODE_TRI);
+        Waveform   waveform(Waveform::MODE_SIN);
         Modulation modulation;
+
+        modulation.FMfreqCoeff = 0.25 * channel;
+
         Envelope   envelope;
-        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 400.0*channel);
+        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 4000.0);
+//        Filter     filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 400.0*(channel+1));
         Patch patch(waveform, envelope, modulation, filter);
-        Effect     effect(44100, 44100*10, true);
+
+        bool delayEnabled = false;
+
+        if (channel == 5) delayEnabled = true;
+
+        Effect     effect(44100, 44100*10, false);
 
         activeSounds.push_back(patchlist);
         activePatches.push_back(patch);
         channelEffects.push_back(effect);
     }
+
+    reverbModel.setroomsize(0.75f);
+    reverbModel.setwet(0.7f);
 }
 
 void
@@ -131,6 +143,7 @@ ManagerConsole::generateCallback(double t,
                 manager->channelEffects[channel].delayRBapply(channelOutput,
                                                               numSamples);
             }
+
         }
 
         for (unsigned int sample = 0; sample < numSamples; sample++) {
@@ -140,8 +153,11 @@ ManagerConsole::generateCallback(double t,
         channelOutput = 0;
     }
 
+    /*
     std::copy(outputMono, outputMono + numSamples, outputLeft);
     std::copy(outputMono, outputMono + numSamples, outputRight);
+    */
+    manager->reverbModel.processreplace(outputMono, outputMono, outputLeft, outputRight, numSamples, 1);
 
     delete[] outputMono;
 }

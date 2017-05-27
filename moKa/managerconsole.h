@@ -27,6 +27,8 @@
 #include "envelope.h"
 #include "effect.h"
 
+#include "freeverb/revmodel.hpp"
+
 #include <vector>
 #include <list>
 
@@ -39,7 +41,6 @@ public:
     void openAudioInterface();
     void closeMIDI();
     void closeAudioInterface();
-
 private:
     AudioInterface *audioInterface;
     RtMIDIInterface *MIDIInterface;
@@ -68,6 +69,8 @@ private:
     std::vector<Patch> activePatches;
     std::vector<std::list<Patch> > activeSounds;
     std::vector<Effect> channelEffects;
+
+    revmodel reverbModel;
 };
 
 #endif // MANAGERCONSOLE_H

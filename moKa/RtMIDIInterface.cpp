@@ -66,6 +66,13 @@ RtMIDIInterface::getNumberOfPorts() {
 std::string
 RtMIDIInterface::getPortName(unsigned int port) {
     assert(port < nPorts);
+
+    return portNames[port];
+}
+
+std::string
+RtMIDIInterface::getCurrentPortName() {
+    return activePortName;
 }
 
 void
@@ -76,6 +83,17 @@ RtMIDIInterface::openPort(unsigned int port) {
 
     activePort = port;
     portOpen = true;
+    activePortName = getPortName(port);
+}
+
+void
+RtMIDIInterface::openPort(std::string name) {
+    for (unsigned int indPort = 0; indPort < nPorts; indPort++) {
+        if (portNames[indPort] == name) {
+            openPort(indPort);
+            return;
+        }
+    }
 }
 
 void
@@ -140,14 +158,14 @@ RtMIDIInterface::RtCallback(double deltaTime,
 
         if (func >= 128 && func <= 143) {
             unsigned char channel = func - 128;
-            unsigned char note    = data1;
+            unsigned char note    = data1 + 12;
 
             if (iface->noteOffCallbackEnabled)
                 (*iface->_noteOffCallback)(channel, note, iface->noteOffUserData);
         }
         if (func >= 144 && func <= 159) {
             unsigned char channel = func - 144;
-            unsigned char note    = data1;
+            unsigned char note    = data1 + 12;
             unsigned char velocity= data2;
 
             if (velocity > 0) {

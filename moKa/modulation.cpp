@@ -16,14 +16,37 @@
  */
 
 #include "modulation.h"
+#include <math.h>
 
-Modulation::Modulation()
-{
+Modulation::Modulation() {
+    FMmode = FM_PROP_FREQ;
+    AMmode = AM_OFF;
+    //FMmode = FM_OFF;
 
+    FMfreqCoeff = 1.0;
+    FMampl = 3.0;
 }
 
 double
-Modulation::eval(double t,
-                 double velocity) {
+Modulation::eval(double wavefreq,
+                 double t,
+                 double amplitude,
+                 double envelope) {
+    double tt = t + 100.0;
 
+    double fcoeff = 2.0 * M_PI * wavefreq;
+
+    switch (FMmode) {
+    case FM_OFF:
+        return fcoeff * t;
+        break;
+    case FM_DIRECT:
+        return 2.0 * M_PI * t * (wavefreq + envelope*FMampl*cos(2*M_PI*FMfreqRaw*t));
+        break;
+    case FM_PROP_FREQ:
+//        return fcoeff * t * (1.0 + envelope * FMampl * cos(fcoeff*FMfreqCoeff*tt));
+        return fcoeff * t + envelope * FMampl * amplitude * cos(fcoeff*FMfreqCoeff*tt);
+        break;
+    }
+    return 0.0;
 }

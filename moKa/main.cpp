@@ -22,11 +22,11 @@
 
 int main(int argc, char *argv[])
 {
-    ManagerConsole *manager = new ManagerConsole();
-    manager->openAudioInterface();
+    //ManagerConsole *manager = new ManagerConsole();
+    //manager->openAudioInterface();
 
     std::cout << "FOO" << std::endl;
-    manager->openMIDI(1);
+    //manager->openMIDI(1);
     std::cout << "FOO" << std::endl;
 
     QApplication a(argc, argv);

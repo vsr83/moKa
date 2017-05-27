@@ -25,11 +25,11 @@
 #define IS_VALID_MODE(x) (x == MODE_EXP || x == MODE_LINEAR)
 
 Envelope::Envelope() {
-    attackTime       = 0.1;
-    decayTime        = 0.25;
+    attackTime       = 0.05;
+    decayTime        = 0.1;
     releaseTime      = 0.25;
     peakAmplitude    = 1.0;
-    sustainAmplitude = 0.5;
+    sustainAmplitude = 0.25;
 
     timeAtTrigger      = 0.0;
     timeAtRelease      = 0.0;
@@ -37,7 +37,7 @@ Envelope::Envelope() {
     state = STATE_OFF;
 
     modeAttack  = MODE_LINEAR;
-    modeDecay   = MODE_EXP;
+    modeDecay   = MODE_LINEAR;
     modeRelease = MODE_EXP;
 }
 

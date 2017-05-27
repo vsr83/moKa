@@ -31,6 +31,8 @@ public:
           Filter     &_filter);
     ~Patch();
 
+    void setTimbre(std::vector<double> &_timbreAmplitudes,
+                   std::vector<double> &_timbreCoefficients);
     void trigger(double _frequency,
                  double _amplitude,
                  double _initialTime);
@@ -56,6 +58,10 @@ private:
     Waveform   waveform;
     Envelope   envelope;
     Modulation modulation;
+
+    // External (not in waveform) Timbre
+    std::vector<double> timbreAmplitudes;
+    std::vector<double> timbreCoefficients;
 };
 
 #endif // PATCH_H

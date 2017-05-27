@@ -18,6 +18,8 @@
 #ifndef WAVEFORM_H
 #define WAVEFORM_H
 
+#include <vector>
+
 class Waveform {
 public:
     Waveform(unsigned int _mode = MODE_SIN,
@@ -35,6 +37,9 @@ public:
         MODE_SQU,
         MODE_WAV
     };
+
+    void recreateWithTimbre(std::vector<double> &_timbreAmplitudes,
+                            std::vector<double> &_timbreCoefficients);
 
     void trigger(double initialTime);
     double eval(double t);

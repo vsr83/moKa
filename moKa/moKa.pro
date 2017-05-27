@@ -25,7 +25,16 @@ SOURCES += main.cpp\
     AudioInterface.cpp \
     managerconsole.cpp \
     filter.cpp \
-    effect.cpp
+    effect.cpp \
+    freeverb/allpass.cpp \
+    freeverb/comb.cpp \
+    freeverb/revmodel.cpp \
+    logwindow.cpp \
+    managerqt.cpp \
+    kbWidget.cpp \
+    reverbwidget.cpp \
+    midiconfiguration.cpp \
+    patchconfiguration.cpp
 
 HEADERS  += mainwindow.h \
     patch.h \
@@ -36,7 +45,18 @@ HEADERS  += mainwindow.h \
     AudioInterface.h \
     managerconsole.h \
     filter.h \
-    effect.h
+    effect.h \
+    freeverb/allpass.hpp \
+    freeverb/comb.hpp \
+    freeverb/denormals.h \
+    freeverb/revmodel.hpp \
+    freeverb/tuning.h \
+    logwindow.h \
+    managerqt.h \
+    kbWidget.h \
+    reverbwidget.h \
+    midiconfiguration.h \
+    patchconfiguration.h
 
 DISTFILES += \
     README.md
