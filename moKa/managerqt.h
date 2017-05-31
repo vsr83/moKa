@@ -54,6 +54,8 @@ public:
     void closeAudioInterface();
 
 private:
+    std::vector<std::vector<double> > channelPatchMapping;
+
     AudioInterface *audioInterface;
     //RtMIDIInterface *MIDIInterface;
 

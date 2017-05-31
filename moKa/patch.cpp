@@ -91,7 +91,12 @@ Patch::eval(double t,
                                                patchTime,
                                                amplitude * timbreAmplitudes[indTimbre],
                                                envelopeValue);
-        out += timbreAmplitudes[indTimbre] * waveform.eval(modulatedTime);
+        double coeff = 1.0;
+        if (indTimbre != 0) {
+            coeff = exp(-patchTime * 10.0);
+        }
+
+        out += timbreAmplitudes[indTimbre] * waveform.eval(modulatedTime) * coeff;
     }
 
     if (withEnvelope)

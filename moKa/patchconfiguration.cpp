@@ -13,6 +13,9 @@ PatchConfiguration::configureDefaultPatches() {
     Modulation noModulation;
     noModulation.FMmode = Modulation::FM_OFF;
     Envelope   defaultEnv;
+    defaultEnv.setMode(Envelope::MODE_EXP,
+                       Envelope::MODE_EXP,
+                       Envelope::MODE_EXP);
     defaultEnv.sustainAmplitude = 0.5;
 
     Filter     filterLP(Filter::FILTER_LOWPASS,
@@ -68,8 +71,8 @@ PatchConfiguration::configureDefaultPatches() {
                                        timbreCoeffPrincipal8);
     Patch patchPrincipal8(WFPrincipal8Int, defaultEnv, noModulation, filterLP);
 
-    std::vector<double> detuneAmpl = {0.5, 0.5};
-    std::vector<double> detuneCoeff = {1.0, 1.01};
+    std::vector<double> detuneAmpl = {0.75, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.125, 0.125};
+    std::vector<double> detuneCoeff = {1.0, 1.05, 1.025, 0.95, 0.975, 2.025, 2.0125, 0.5125, 0.525};
 
     Patch patchQuintadena8Detuned = patchQuintadena8;
     patchQuintadena8Detuned.setTimbre(detuneAmpl, detuneCoeff);
