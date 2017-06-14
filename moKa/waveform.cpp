@@ -206,3 +206,8 @@ void
 Waveform::trigger(double initialTime) {
     timeAtTrigger = initialTime;
 }
+
+unsigned int
+Waveform::getMode() {
+    return mode;
+}

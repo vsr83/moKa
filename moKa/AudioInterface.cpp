@@ -104,6 +104,9 @@ AudioInterface::PaCallback(const void *inputBuffer,
     }
 
     for (unsigned int indSample = 0; indSample < framesPerBuffer; indSample++) {
+
+        if (outRight[indSample] > 1.0) outRight[indSample] = 1.0;
+        if (outRight[indSample] < -1.0) outRight[indSample] = -1.0;
         out[indSample*2] = outLeft[indSample];
         out[indSample*2 + 1] = outRight[indSample];
     }

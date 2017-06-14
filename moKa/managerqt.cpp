@@ -18,12 +18,27 @@ ManagerQt::ManagerQt() {
     for (unsigned int channel = 0; channel < 16; channel++) {
         activeSounds.push_back(patchlist);
         activePatches.push_back(patch);
-        channelEffects.push_back(effect);
+        if (channel == 0) {
+            Effect     effectDelay(44100, 44100*10, false);
+            patchEffects.push_back(effectDelay);
+
+        } else {
+            patchEffects.push_back(effect);
+        }
+        std::vector<double> mapping = {0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0,
+                                       0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0};
+        mapping[channel] = 1.0;
+        channelPatchMapping.push_back(mapping);
     }
 
+    std::vector<double> mapping = {0.0, 0.0, 0.6, 0.3,  0.3, 0.0, 0.0, 0.0,
+                                   0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0};
+    channelPatchMapping[7] = mapping;
     reverbEnabled = true;
     reverbModel.setroomsize(0.75f);
     reverbModel.setwet(0.7f);
+
+    lastMIDIChannel = 0;
 }
 
 void
@@ -98,45 +113,54 @@ ManagerQt::generateCallback(double t,
 
     double currentTime = manager->getCurrentTime();
 
-    for (unsigned int channel = 0; channel < 16; channel++) {
-        float *channelOutput = new float[numSamples];
+    for (unsigned int patch = 0; patch < manager->activePatches.size(); patch++) {
+        float *patchOutput = new float[numSamples];
+
         for (unsigned int sample = 0; sample < numSamples; sample++) {
-            channelOutput[sample] = 0.0;
+            patchOutput[sample] = 0.0;
         }
 
-        for (std::list<Patch>::iterator it = manager->activeSounds[channel].begin(); it != manager->activeSounds[channel].end();) {
-            if ((*it).isFinished()) {
-                manager->activeSounds[channel].erase(it++);
-            } else {
-                double t = currentTime;
+        for (unsigned int channel = 0; channel < 16; channel++) {
+            for (std::list<Patch>::iterator it = manager->activeSounds[channel].begin(); it != manager->activeSounds[channel].end();) {
 
-                for (unsigned int sample = 0; sample < numSamples; sample++) {
-                    channelOutput[sample] += 0.1 * (*it).eval(t);
-                    t += dt;
+                if ((*it).index == patch) {
+                    if ((*it).isFinished()) {
+                        manager->activeSounds[channel].erase(it++);
+                    } else {
+                        double t = currentTime;
+
+                        for (unsigned int sample = 0; sample < numSamples; sample++) {
+                            patchOutput[sample] += 0.025 * (*it).eval(t);
+                            t += dt;
+                        }
+                        ++it;
+                    }
+                } else {
+                    ++it;
                 }
-                ++it;
             }
         }
-        manager->channelEffects[channel].filterRBAddData(channelOutput, numSamples);
-        if (manager->activePatches[channel].hasFilter()) {
-            manager->channelEffects[channel].filterConvolve(&manager->activePatches[channel].filter,
-                                                            channelOutput,
-                                                            numSamples);
-            if (manager->channelEffects[channel].delayEnabled) {
-                manager->channelEffects[channel].delayRBAddData(channelOutput,
-                                                                numSamples);
 
-                manager->channelEffects[channel].delayRBapply(channelOutput,
-                                                              numSamples);
+        manager->patchEffects[patch].filterRBAddData(patchOutput, numSamples);
+        if (manager->activePatches[patch].hasFilter()) {
+            manager->patchEffects[patch].filterConvolve(&manager->activePatches[patch].filter,
+                                                        patchOutput,
+                                                        numSamples);
+            if (manager->patchEffects[patch].delayEnabled) {
+                manager->patchEffects[patch].delayRBAddData(patchOutput,
+                                                            numSamples);
+
+                manager->patchEffects[patch].delayRBapply(patchOutput,
+                                                            numSamples);
             }
 
         }
 
         for (unsigned int sample = 0; sample < numSamples; sample++) {
-            outputMono[sample] += channelOutput[sample];
+            outputMono[sample] += patchOutput[sample];
         }
-        delete [] channelOutput;
-        channelOutput = 0;
+        delete [] patchOutput;
+        patchOutput = 0;
     }
 
     if (manager->reverbEnabled) {
@@ -151,17 +175,22 @@ ManagerQt::generateCallback(double t,
 
 void
 ManagerQt::noteOnCallback(unsigned char channel,
-                               unsigned char note,
-                               unsigned char vel,
-                               void *userData) {
+                          unsigned char note,
+                          unsigned char vel,
+                          void *userData) {
     ManagerQt *manager = (ManagerQt *) userData;
 
     manager->mutex.lock();
+    manager->lastMIDIChannel = channel;
 
-    Patch patch = manager->activePatches[channel];
-    patch.triggerFromMIDI(note, vel, manager->getCurrentTime());
-    manager->activeSounds[channel].push_back(patch);
-
+    for (unsigned int indPatch = 0; indPatch < manager->activePatches.size(); indPatch++) {
+        if (manager->channelPatchMapping[channel][indPatch] != 0.0) {
+            Patch patch = manager->activePatches[indPatch];
+            patch.triggerFromMIDI(note, vel, manager->getCurrentTime());
+            patch.amplitudeCoeff = manager->channelPatchMapping[channel][indPatch];
+            manager->activeSounds[channel].push_back(patch);
+        }
+    }
     emit manager->signalNoteOn(channel, note, vel);
 
     QString debugStr;
@@ -198,9 +227,9 @@ ManagerQt::noteOffCallback(unsigned char channel,
 
 void
 ManagerQt::channelModeCallback(unsigned char byte1,
-                                    unsigned char byte2,
-                                    unsigned char bank,
-                                    void *userData) {
+                               unsigned char byte2,
+                               unsigned char bank,
+                               void *userData) {
     ManagerQt *manager = (ManagerQt *) userData;
     manager->mutex.lock();
 
@@ -210,6 +239,19 @@ ManagerQt::channelModeCallback(unsigned char byte1,
     QTextStream(&debugStr) << "MIDI - CHANNEL MODE byte1=" << byte1
                            << ", byte2 = " << byte2
                            << ", bank = "  << bank;
+
+    Q_ASSERT(manager->lastMIDIChannel < 16);
+
+    if (byte1 >= 12 && byte1 <= 19) { // sliders 1-8
+        int knob = byte1 - 12;
+        double value = ((float)byte2)/127.0;
+
+        if (bank == 0) {
+            manager->channelPatchMapping[manager->lastMIDIChannel][knob] = ((float)byte2)/127.0;
+        } else if (bank == 1) {
+            manager->channelPatchMapping[manager->lastMIDIChannel][knob + 8] = ((float)byte2)/127.0;
+        }
+    }
 
     emit manager->debugText(debugStr);
     manager->mutex.unlock();
@@ -300,10 +342,13 @@ ManagerQt::MIDIOpen(QString name) {
 }
 
 void
-ManagerQt::setChannelPatch(unsigned int MIDIChannel,
-                           const Patch &patch) {
-    Q_ASSERT(MIDIChannel < 16);
-    emit debugText(tr("Setting channel patch"));
-    activePatches[MIDIChannel] = patch;
+ManagerQt::setPatch(unsigned int index,
+                    const Patch &patch) {
+    Q_ASSERT(index < 16);
+    mutex.lock();
+    emit debugText(tr("Setting patch"));
+    activePatches[index] = patch;
+    activePatches[index].index = index;
+    mutex.unlock();
 }
 

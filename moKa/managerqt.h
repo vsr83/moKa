@@ -74,18 +74,19 @@ private:
     * The high-level activities for the audio synthesis are carried out in the
     * method generateCallback, which is called by the audio interface whenever
     * new samples are needed. The parameters for each generated note are
-    * contained in Patch objects, which are associated to each MIDI channel in
-    * the activePatches vector. When an active note is created, a copy of the
-    * patch associated to the MIDI channel of the note is created and added
-    * to the list activeSounds[channel] with appropriately modified note and
-    * amplitude parameters.
+    * contained in Patch objects. Each note on a MIDI channel corresponds to a
+    * linear combination of Patches given in channelPatchMapping.
+    * When an active note is created, a copy of each patch associated to the
+    * MIDI channel of the note is created and added to the list
+    * activeSounds[channel] with appropriately modified note and amplitude
+    * parameters.
     */
 
     static void generateCallback(double t,                 // [In] Time from the initialization of the audio IF.
                                  double dt,                // [In] Duration of each sample.
                                  unsigned int numSamples,  // [In] Number of samples to be generated.
                                  float *outputLeft,        // [In] Pointer to the start of samples for left channel.
-                                 float *outputRight,       // [In] Pointer to the start of samples for left channel.
+                                 float *outputRight,       // [In] Pointer to the start of samples for right channel.
                                  void *userData);          // [In] Pointer to the ManagerQt object.
 
    /*
@@ -105,10 +106,13 @@ private:
                                     unsigned char bank,
                                     void *userData);       // [In] Pointer to the ManagerQt object.
 
-    // Default Patch, list of active patches and effects for each MIDI channel.
+    // List of Patches.
     std::vector<Patch> activePatches;
+    // List of active sounds for each channel.
     std::vector<std::list<Patch> > activeSounds;
-    std::vector<Effect> channelEffects;
+    std::vector<Effect> patchEffects;
+
+    unsigned int lastMIDIChannel;
 
     // Reverb model applied to all channels.
     bool reverbEnabled;
@@ -142,8 +146,8 @@ public slots:
     void MIDIIFSelectionStatus(const QVector<QString>      MIDIIFList,
                                const QVector<unsigned int> MIDIIFCurrentNumbers,
                                const QVector<bool>         MIDIIFSelectionStatus);
-    void setChannelPatch(unsigned int MIDIChannel,
-                         const Patch &patch);
+    void setPatch(unsigned int index,
+                  const Patch &patch);
 signals:
     void initializeReverb(bool enabled,
                           double wet,

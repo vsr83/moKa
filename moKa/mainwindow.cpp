@@ -62,9 +62,9 @@ MainWindow::MainWindow(QWidget *parent)
             managerQt,         SLOT(MIDIIFSelectionStatus(QVector<QString>,QVector<uint>,QVector<bool>)));
     MDI->addSubWindow(midiConfiguration, flags);
 
-    patchConfiguration = new PatchConfiguration();
-    connect(patchConfiguration, SIGNAL(setChannelPatch(uint,Patch)),
-            managerQt,          SLOT(setChannelPatch(uint,Patch)));
+    patchConfiguration = new PatchConfiguration(16);
+    connect(patchConfiguration, SIGNAL(setPatch(uint,Patch)),
+            managerQt,          SLOT(setPatch(uint,Patch)));
     patchConfiguration->configureDefaultPatches();
     MDI->addSubWindow(patchConfiguration, flags);
 }

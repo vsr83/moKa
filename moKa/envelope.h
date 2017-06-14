@@ -19,7 +19,8 @@ public:
     };
     enum {
         MODE_EXP,
-        MODE_LINEAR
+        MODE_LINEAR,
+        MODE_INVALID
     };
 
     void trigger(double t);

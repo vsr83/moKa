@@ -31,9 +31,39 @@ Patch::Patch(Waveform &_waveform,
 
     frequency = 0.0;
     amplitude = 0.0;
+    amplitudeCoeff = 1.0;
 
     timbreAmplitudes = {1.0};
     timbreCoefficients = {1.0};
+
+    if (waveform.getMode() == Waveform::MODE_SIN) {
+        phaseShift = ((double)rand()) / ((double)RAND_MAX);
+    } else {
+        phaseShift = 0;
+    }
+
+    index = 0;
+}
+
+Patch::Patch() {
+    Waveform   _waveform(Waveform::MODE_SIN);
+    Modulation _modulation;
+    Envelope   _envelope;
+    Filter     _filter(Filter::FILTER_LOWPASS, Filter::WINDOW_RECT, 256, 44100, 4000.0);
+
+    waveform   = _waveform;
+    envelope   = _envelope;
+    modulation = _modulation;
+    filter     = _filter;
+
+    frequency = 0.0;
+    amplitudeCoeff = 1.0;
+    amplitude = 0.0;
+
+    timbreAmplitudes = {1.0};
+    timbreCoefficients = {1.0};
+    phaseShift = 0;
+    index = 0;
 }
 
 Patch::~Patch() {
@@ -92,11 +122,11 @@ Patch::eval(double t,
                                                amplitude * timbreAmplitudes[indTimbre],
                                                envelopeValue);
         double coeff = 1.0;
-        if (indTimbre != 0) {
-            coeff = exp(-patchTime * 10.0);
-        }
+        //if (indTimbre != 0) {
+        //    coeff = exp(-patchTime * 10.0);
+        //}
 
-        out += timbreAmplitudes[indTimbre] * waveform.eval(modulatedTime) * coeff;
+        out += amplitudeCoeff * timbreAmplitudes[indTimbre] * waveform.eval(modulatedTime + phaseShift) * coeff;
     }
 
     if (withEnvelope)
@@ -117,3 +147,28 @@ Patch::setTimbre(std::vector<double> &_timbreAmplitudes,
     timbreAmplitudes = _timbreAmplitudes;
     timbreCoefficients = _timbreCoefficients;
 }
+
+void
+Patch::setEnvelope(Envelope &_envelope) {
+    envelope = _envelope;
+}
+
+Waveform
+Patch::getWaveform() {
+    return waveform;
+}
+
+void
+Patch::setWaveform(Waveform &_waveform) {
+    waveform = _waveform;
+}
+
+/*
+void
+Patch::setInternalTimbre(std::vector<double> &_timbreAmplitudes,
+                         std::vector<double> &_timbreCoefficients) {
+    assert(_timbreAmplitudes.size() == _timbreCoefficients.size());
+    waveform.recreateWithTimbre(_timbreAmplitudes,
+                                _timbreCoefficients);
+}
+*/

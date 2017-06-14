@@ -43,6 +43,7 @@ public:
 
     void trigger(double initialTime);
     double eval(double t);
+    unsigned int getMode();
 private:
     double fundamentalFrequency;
     double timeAtTrigger;

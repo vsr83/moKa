@@ -29,10 +29,15 @@ public:
           Envelope   &_envelope,
           Modulation &_modulation,
           Filter     &_filter);
+    Patch();
     ~Patch();
 
+    Waveform getWaveform();
+    void setWaveform(Waveform &_waveform);
+    void setEnvelope(Envelope &_envelope);
     void setTimbre(std::vector<double> &_timbreAmplitudes,
                    std::vector<double> &_timbreCoefficients);
+
     void trigger(double _frequency,
                  double _amplitude,
                  double _initialTime);
@@ -49,11 +54,15 @@ public:
     unsigned char note;
     unsigned char vel;
 
+    unsigned int index;
+
     Filter     filter;
+    double amplitudeCoeff;
 private:
     double frequency;
     double amplitude;
     double initialTime;
+    double phaseShift;
 
     Waveform   waveform;
     Envelope   envelope;
