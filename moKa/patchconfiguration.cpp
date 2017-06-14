@@ -21,8 +21,19 @@ PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent)
     QHBoxLayout *hbox2 = new QHBoxLayout;
     QHBoxLayout *hbox3 = new QHBoxLayout;
 
+    QVector<double> defaultCoefficients = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+    QVector<double> defaultAmplitudes   = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
     internalTimbre = new TimbreWidget(8);
+    internalTimbre->setAmplitudes(defaultAmplitudes);
+    internalTimbre->setCoefficients(defaultCoefficients);
+
+    defaultCoefficients = {1.0, 1.001, 0.999, 1.01, 0.99, 1.05, 0.95, 0.9};
+    defaultAmplitudes   = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
     externalTimbre = new TimbreWidget(8);
+    externalTimbre->setAmplitudes(defaultAmplitudes);
+    externalTimbre->setCoefficients(defaultCoefficients);
     hbox2->addWidget(internalTimbre);
     hbox3->addWidget(externalTimbre);
     intTimbreGroup->setLayout(hbox2);
@@ -37,10 +48,10 @@ PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent)
         patchConfiguration.push_back(tmpPatch);
     }
     currentPatch = 0;
-    connect(internalTimbre, SIGNAL(settingsChanged(QVector<int>&,QVector<int>&)),
-            this,           SLOT(setInternalTimbre(QVector<int>&,QVector<int>&)));
-    connect(externalTimbre, SIGNAL(settingsChanged(QVector<int>&,QVector<int>&)),
-            this,           SLOT(setExternalTimbre(QVector<int>&,QVector<int>&)));
+    connect(internalTimbre, SIGNAL(settingsChanged(QVector<double>&,QVector<double>&)),
+            this,           SLOT(setInternalTimbre(QVector<double>&,QVector<double>&)));
+    connect(externalTimbre, SIGNAL(settingsChanged(QVector<double>&,QVector<double>&)),
+            this,           SLOT(setExternalTimbre(QVector<double>&,QVector<double>&)));
     connect(adsrWidget, SIGNAL(envelopeChanged(Envelope&)),
             this,       SLOT(envelopeChanged(Envelope&)));
 }
@@ -64,49 +75,33 @@ PatchConfiguration::envelopeChanged(Envelope &envelope) {
 }
 
 void
-PatchConfiguration::setInternalTimbre(QVector<int> &amplitudes,
-                                      QVector<int> &phases) {
+PatchConfiguration::setInternalTimbre(QVector<double> &amplitudes,
+                                      QVector<double> &coefficients) {
     Q_ASSERT(currentPatch < patchConfiguration.size());
-
-    std::vector<double> timbreCoefficients;
-    std::vector<double> timbreAmplitudes;
 
     Patch patch = patchConfiguration[currentPatch];
     Waveform waveform = patch.getWaveform();
 
-    for (unsigned int indTimbre = 0; indTimbre < amplitudes.size(); indTimbre++) {
-        timbreCoefficients.push_back((double)(indTimbre) + 1.0);
-        timbreAmplitudes.push_back(0.01 * ((double)amplitudes[indTimbre]));
-    }
-    waveform.recreateWithTimbre(timbreAmplitudes, timbreCoefficients);
+    std::vector<double> sAmpl = amplitudes.toStdVector();
+    std::vector<double> sCoeff = coefficients.toStdVector();
+
+    waveform.recreateWithTimbre(sAmpl, sCoeff);
     patch.setWaveform(waveform);
     patchConfiguration[currentPatch] = patch;
     emit setPatch(currentPatch, patch);
 }
 
 void
-PatchConfiguration::setExternalTimbre(QVector<int> &amplitudes,
-                                      QVector<int> &phases) {
+PatchConfiguration::setExternalTimbre(QVector<double> &amplitudes,
+                                      QVector<double> &coefficients) {
     Q_ASSERT(currentPatch < patchConfiguration.size());
-
-    std::vector<double> timbreCoefficients;
-    std::vector<double> timbreAmplitudes;
 
     Patch patch = patchConfiguration[currentPatch];
 
-    for (unsigned int indTimbre = 0; indTimbre < amplitudes.size(); indTimbre++) {
-        timbreCoefficients.push_back((double)(indTimbre) + 1.0);
-        timbreAmplitudes.push_back(0.01 * ((double)amplitudes[indTimbre]));
-    }
-    timbreCoefficients[0] = 1.0;
-    timbreCoefficients[1] = 0.999;
-    timbreCoefficients[2] = 1.001;
-    timbreCoefficients[3] = 0.99;
-    timbreCoefficients[4] = 1.01;
-    timbreCoefficients[5] = 0.95;
-    timbreCoefficients[6] = 1.05;
-    timbreCoefficients[7] = 2.0;
-    patch.setTimbre(timbreAmplitudes, timbreCoefficients);
+    std::vector<double> sAmpl = amplitudes.toStdVector();
+    std::vector<double> sCoeff = coefficients.toStdVector();
+
+    patch.setTimbre(sAmpl, sCoeff);
     patchConfiguration[currentPatch] = patch;
     emit setPatch(currentPatch, patch);
 }
@@ -212,17 +207,17 @@ PatchConfiguration::configureDefaultPatches() {
     Envelope   defaultEnv4 = defaultEnv;
     Envelope   defaultEnv16 = defaultEnv;
 
-    defaultEnv4.attackTime = defaultEnv.attackTime * 2;
-    defaultEnv4.decayTime = defaultEnv.decayTime * 2;
-    defaultEnv4.releaseTime = defaultEnv.releaseTime * 2;
-    defaultEnv16.attackTime = defaultEnv.attackTime * 0.5;
-    defaultEnv16.decayTime = defaultEnv.decayTime * 0.5;
+    defaultEnv4.attackTime   = defaultEnv.attackTime * 2;
+    defaultEnv4.decayTime    = defaultEnv.decayTime * 2;
+    defaultEnv4.releaseTime  = defaultEnv.releaseTime * 2;
+    defaultEnv16.attackTime  = defaultEnv.attackTime * 0.5;
+    defaultEnv16.decayTime   = defaultEnv.decayTime * 0.5;
     defaultEnv16.releaseTime = defaultEnv.releaseTime * 0.5;
 
-    Waveform WFPrincipal4Int = WFSin;
+    Waveform WFPrincipal4Int  = WFSin;
     Waveform WFPrincipal16Int = WFSin;
     Waveform WFQuintadena4Int = WFSin;
-    Waveform WFSubbas8Int = WFSin;
+    Waveform WFSubbas8Int     = WFSin;
     WFPrincipal16Int.recreateWithTimbre(timbreAmplPrincipal8, timbreCoeffPrincipal16);
     WFPrincipal4Int.recreateWithTimbre(timbreAmplPrincipal8,  timbreCoeffPrincipal4);
     WFSubbas8Int.recreateWithTimbre(timbreAmplSubbas16,  timbreCoeffPrincipal4);
@@ -234,7 +229,7 @@ PatchConfiguration::configureDefaultPatches() {
     Patch patchQuintadena4(WFQuintadena4Int, defaultEnv4, noModulation, filterLP);
 
 
-    patchQuintadena4.setWaveform(WFSaw);
+    //patchQuintadena4.setWaveform(WFSaw);
 
     configurePatch(0, patchQuintadena4);
     configurePatch(1, patchQuintadena8);

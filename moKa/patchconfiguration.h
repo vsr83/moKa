@@ -31,10 +31,10 @@ private:
 
     unsigned int currentPatch;
 public slots:
-    void setInternalTimbre(QVector<int> &amplitudes,
-                           QVector<int> &phases);
-    void setExternalTimbre(QVector<int> &amplitudes,
-                           QVector<int> &phases);
+    void setInternalTimbre(QVector<double> &amplitudes,
+                           QVector<double> &coefficients);
+    void setExternalTimbre(QVector<double> &amplitudes,
+                           QVector<double> &coefficients);
     void envelopeChanged(Envelope &envelope);
 signals:
     void setPatch(unsigned int MIDIChannel,

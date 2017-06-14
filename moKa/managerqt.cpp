@@ -286,7 +286,7 @@ ManagerQt::MIDIIFSelectionStatus(const QVector<QString>      MIDIIFList,
     Q_ASSERT(MIDIIFList.size() == MIDIIFCurrentNumbers.size());
     Q_ASSERT(MIDIIFList.size() == MIDIIFSelection.size());
 
-   // mutex.lock();
+    mutex.lock();
     // Check for disconnected devices:
     for (QList<RtMIDIInterface*>::iterator it = MIDIInterfaces.begin(); it != MIDIInterfaces.end();it++) {
         RtMIDIInterface *IF = *it;
@@ -320,7 +320,7 @@ ManagerQt::MIDIIFSelectionStatus(const QVector<QString>      MIDIIFList,
             qDebug() << "Ok";
         }
     }
-   // mutex.unlock();
+    mutex.unlock();
 }
 
 bool

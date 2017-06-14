@@ -8,7 +8,6 @@
 #include <QSlider>
 #include <QDial>
 #include <QLabel>
-#include <QSignalMapper>
 
 class TimbreWidget : public QWidget {
     Q_OBJECT
@@ -17,25 +16,52 @@ public:
     TimbreWidget(int _numHarmonics, QWidget *parent = 0);
     ~TimbreWidget();
 
-    void getValues(QVector<int> &amplitudesOut, QVector<int> &phasesOut);
-    void setValues(QVector<int> &amplitudesIn, QVector<int> &phasesIn);
+    void getValues(QVector<double> &amplitudesOut,
+                   QVector<double> &coefficientsOut);
+    void setValues(QVector<double> &amplitudesIn,
+                   QVector<double> &coefficientsIn);
 public slots:
     void reset();
     void updateValues();
+
+    void setDetuneRange  (double _detuneMin,
+                          double _detuneMax);
+    void setSliderMode   (bool linear);
+    void setSliderRange  (double _sliderMin,
+                          double _sliderMax);
+    void setSliderSteps  (unsigned int _sliderSteps);
+    void setDetuneEnabled(bool enabled);
+    void setAmplitudes   (QVector<double> &_amplitudes);
+    void setCoefficients (QVector<double> &_coefficients);
 private slots:
     void valueChanged(int tmp);
 signals:
-    void settingsChanged(QVector<int> &amplitudes, QVector<int> &phases);
+    void settingsChanged(QVector<double> &amplitudes,
+                         QVector<double> &coefficients);
 private:
+    unsigned int sliderDoubleUns(double val);
+    double       sliderUnsDouble(unsigned int step);
+
+    int     detuneDoubleInt(double step);
+    double  detuneIntDouble(int step);
+
     int numHarmonics;
     QHBoxLayout *hbox;
 
-    QVector<QSlider *> sliders;
-    QVector<QDial *> dials;
-    QVector<int> amplitudes;
-    QVector<int> phases;
+    QVector<QSlider *> amplitudeSliders;
+    QVector<QDial *>   coefficientDials;
+    QVector<QDial *>   detuneDials;
+    QVector<QLabel *>  coefficientLabels;
+    QVector<QLabel *>  detuneLabels;
 
-    QSignalMapper *signalMapper;
+    QVector<double> amplitudes;
+    QVector<double> coefficients;
+
+    double sliderMin, sliderMax;
+    unsigned int sliderSteps;
+
+    double detuneMin;
+    double detuneMax;
 };
 
 #endif // TIMBREWIDGET_H

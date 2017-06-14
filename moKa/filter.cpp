@@ -130,7 +130,7 @@ Filter::Filter(unsigned int _type,
         }
 
         IR[ind_n] = v;
-        std::cout << ind_n << " " << v << std::endl;
+        //std::cout << ind_n << " " << v << std::endl;
     }
 }
 
@@ -172,9 +172,6 @@ Filter::operator =(const Filter &filter) {
 
     IR = new double[size];
     std::copy(filter.IR, filter.IR + size, IR);
-
-    for (unsigned int ind = 0 ; ind < size; ind++)
-        std::cout << "- " << ind << " " << filter.IR[ind] << " " << IR[ind] << std::endl;
 
     return *this;
 }

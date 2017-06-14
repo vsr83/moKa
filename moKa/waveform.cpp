@@ -92,7 +92,7 @@ Waveform::recreateWithTimbre(std::vector<double> &timbreAmplitudes,
         waveTable[indSample] = 0.0;
 
     for (unsigned int indTimbre = 0; indTimbre < timbreAmplitudes.size(); indTimbre++) {
-
+std::cout << timbreCoefficients[indTimbre] << std::endl;
         for (unsigned int indSample = 0; indSample < tableSize; indSample++) {
             double angle = ((double) indSample) * 2.0 * timbreCoefficients[indTimbre] * M_PI / tableSizeFloat;
 
