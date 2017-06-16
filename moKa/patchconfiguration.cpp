@@ -1,9 +1,21 @@
 #include "patchconfiguration.h"
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QDebug>
 
 PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent) : QWidget(parent) {
     gridLayout = new QGridLayout;
+
+    QHBoxLayout *patchSelectionHBox = new QHBoxLayout();
+    QLabel *patchSelectionLabel = new QLabel(tr("Patch Number:"));
+    QLabel *patchNameLabel = new QLabel(tr("Name:"));
+    patchNameEdit = new QLineEdit();
+    patchSelectSpinBox = new QSpinBox();
+    patchSelectionHBox->addWidget(patchSelectionLabel);
+    patchSelectionHBox->addWidget(patchSelectSpinBox);
+    patchSelectionHBox->addWidget(patchNameLabel);
+    patchSelectionHBox->addWidget(patchNameEdit);
+    gridLayout->addLayout(patchSelectionHBox, 0, 0, 1, 1);
     QWidget *gridWidget = new QWidget();
 
     setLayout(gridLayout);
@@ -14,7 +26,7 @@ PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent)
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->addWidget(adsrWidget);
     envelopeGroup->setLayout(hbox);
-    gridLayout->addWidget(envelopeGroup, 0, 0, 1, 2);
+    gridLayout->addWidget(envelopeGroup, 1, 0, 1, 2);
 
     QGroupBox *intTimbreGroup = new QGroupBox(tr("Internal Timbre"));
     QGroupBox *extTimbreGroup = new QGroupBox(tr("External Timbre"));
@@ -39,9 +51,9 @@ PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent)
     intTimbreGroup->setLayout(hbox2);
     extTimbreGroup->setLayout(hbox3);
 
-    gridLayout->addWidget(envelopeGroup, 0, 0, 1, 2);
-    gridLayout->addWidget(intTimbreGroup, 1, 0, 1, 1);
-    gridLayout->addWidget(extTimbreGroup, 1, 1, 1, 1);
+    gridLayout->addWidget(envelopeGroup, 1, 0, 1, 2);
+    gridLayout->addWidget(intTimbreGroup, 2, 0, 1, 1);
+    gridLayout->addWidget(extTimbreGroup, 2, 1, 1, 1);
 
     for (unsigned int indPatch = 0; indPatch < numPatches; indPatch++) {
         Patch tmpPatch;
@@ -54,6 +66,8 @@ PatchConfiguration::PatchConfiguration(unsigned int numPatches, QWidget *parent)
             this,           SLOT(setExternalTimbre(QVector<double>&,QVector<double>&)));
     connect(adsrWidget, SIGNAL(envelopeChanged(Envelope&)),
             this,       SLOT(envelopeChanged(Envelope&)));
+    connect(patchSelectSpinBox, SIGNAL(valueChanged(int)),
+            this,               SLOT(openPatch(int)));
 }
 
 void
@@ -71,6 +85,7 @@ PatchConfiguration::envelopeChanged(Envelope &envelope) {
 
     Patch patch = patchConfiguration[currentPatch];
     patch.setEnvelope(envelope);
+    patchConfiguration[currentPatch] = patch;
     emit setPatch(currentPatch, patch);
 }
 
@@ -107,6 +122,38 @@ PatchConfiguration::setExternalTimbre(QVector<double> &amplitudes,
 }
 
 void
+PatchConfiguration::openPatch(int patchNumber) {
+    Q_ASSERT(patchNumber < patchConfiguration.size());
+
+    currentPatch = patchNumber;
+
+    std::vector<double> extTimbreAmplitudesIn;
+    std::vector<double> extTimbreCoefficientsIn;
+    std::vector<double> intTimbreAmplitudesIn;
+    std::vector<double> intTimbreCoefficientsIn;
+
+    Patch patch       = patchConfiguration[patchNumber];
+    Envelope env      = patch.getEnvelope();
+    Waveform waveform = patch.getWaveform();
+
+    patch.getTimbre(extTimbreAmplitudesIn, extTimbreCoefficientsIn);
+    adsrWidget->importEnvelope(env);
+    waveform.getTimbre(intTimbreAmplitudesIn, intTimbreCoefficientsIn);
+
+    qDebug() << intTimbreAmplitudesIn.size();
+    for (int ind = 0; ind < intTimbreAmplitudesIn.size(); ind++)
+        qDebug() << ind << intTimbreAmplitudesIn[ind] << intTimbreCoefficientsIn[ind];
+
+    QVector<double> extTimbreAmplitudesOut = QVector<double>::fromStdVector(extTimbreAmplitudesIn);
+    QVector<double> extTimbreCoefficientsOut = QVector<double>::fromStdVector(extTimbreCoefficientsIn);
+    QVector<double> intTimbreAmplitudesOut = QVector<double>::fromStdVector(intTimbreAmplitudesIn);
+    QVector<double> intTimbreCoefficientsOut = QVector<double>::fromStdVector(intTimbreCoefficientsIn);
+
+    externalTimbre->setValues(extTimbreAmplitudesOut, extTimbreCoefficientsOut);
+    internalTimbre->setValues(intTimbreAmplitudesOut, intTimbreCoefficientsOut);
+}
+
+void
 PatchConfiguration::configureDefaultPatches() {
     Waveform   WFSin(Waveform::MODE_SIN);
     Waveform   WFTri(Waveform::MODE_TRI);
@@ -136,7 +183,7 @@ PatchConfiguration::configureDefaultPatches() {
                                                  0.0112202,
                                                  0.0031623,
                                                  0.0112202};
-    std::vector<double>timbreCoeffQuintadena8 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
+    std::vector<double>timbreCoeffQuintadena8 = {1.01, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
     Waveform WFQuintadena8Int = WFSin;
     WFQuintadena8Int.recreateWithTimbre(timbreAmplQuintadena8,
                                         timbreCoeffQuintadena8);

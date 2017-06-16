@@ -149,13 +149,27 @@ Patch::setTimbre(std::vector<double> &_timbreAmplitudes,
 }
 
 void
+Patch::getTimbre(std::vector<double> &_timbreAmplitudes,
+                 std::vector<double> &_timbreCoefficients) {
+    _timbreAmplitudes   = timbreAmplitudes;
+    _timbreCoefficients = timbreCoefficients;
+}
+
+
+void
 Patch::setEnvelope(Envelope &_envelope) {
     envelope = _envelope;
 }
 
+
 Waveform
 Patch::getWaveform() {
     return waveform;
+}
+
+Envelope
+Patch::getEnvelope() {
+    return envelope;
 }
 
 void

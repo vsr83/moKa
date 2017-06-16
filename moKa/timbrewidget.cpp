@@ -72,7 +72,7 @@ TimbreWidget::reset() {
 void
 TimbreWidget::updateValues() {
     for (int harm = 0; harm < numHarmonics; harm++) {
-        qDebug() << harm << amplitudes[harm];
+        qDebug() << harm << amplitudes[harm] << " "<<coefficients[harm];
         amplitudeSliders[harm]->blockSignals(true);
         amplitudeSliders[harm]->setValue(sliderDoubleUns(amplitudes[harm]));
         amplitudeSliders[harm]->blockSignals(false);
@@ -112,9 +112,24 @@ TimbreWidget::valueChanged(int tmp) {
 void
 TimbreWidget::setValues(QVector<double> &amplitudesIn,
                         QVector<double> &coefficientsIn) {
-    amplitudes   = amplitudesIn;
-    coefficients = coefficientsIn;
+    qDebug() << "setValues " << amplitudesIn.size();
+    Q_ASSERT(amplitudesIn.size() == coefficientsIn.size());
+
+    if (amplitudesIn.size() < numHarmonics) {
+        for (unsigned int indHarm = 0; indHarm < amplitudesIn.size(); indHarm++) {
+            amplitudes[indHarm] = amplitudesIn[indHarm];
+            coefficients[indHarm] = coefficientsIn[indHarm];
+        }
+        for (unsigned int indHarm = amplitudesIn.size(); indHarm < numHarmonics; indHarm++) {
+            amplitudes[indHarm] = 0.0;
+            coefficients[indHarm] = indHarm;
+        }
+    } else {
+        amplitudes   = amplitudesIn;
+        coefficients = coefficientsIn;
+    }
     updateValues();
+    qDebug() << " setValues";
 }
 
 void

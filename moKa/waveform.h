@@ -38,6 +38,8 @@ public:
         MODE_WAV
     };
 
+    void getTimbre(std::vector<double> &_timbreAmplitudes,
+                   std::vector<double> &_timbreCoefficients);
     void recreateWithTimbre(std::vector<double> &_timbreAmplitudes,
                             std::vector<double> &_timbreCoefficients);
 
@@ -52,6 +54,9 @@ private:
     double tableSizeFloat;
     double *waveTable;
     unsigned int mode;
+
+    std::vector<double> timbreAmplitudes;
+    std::vector<double> timbreCoefficients;
 
     double evalSin(double tnorm);
     double evalSaw(double tnorm);

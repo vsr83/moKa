@@ -32,10 +32,13 @@ public:
     Patch();
     ~Patch();
 
+    Envelope getEnvelope();
     Waveform getWaveform();
     void setWaveform(Waveform &_waveform);
     void setEnvelope(Envelope &_envelope);
     void setTimbre(std::vector<double> &_timbreAmplitudes,
+                   std::vector<double> &_timbreCoefficients);
+    void getTimbre(std::vector<double> &_timbreAmplitudes,
                    std::vector<double> &_timbreCoefficients);
 
     void trigger(double _frequency,

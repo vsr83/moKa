@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
             managerQt,          SLOT(setPatch(uint,Patch)));
     patchConfiguration->configureDefaultPatches();
     MDI->addSubWindow(patchConfiguration, flags);
+    patchConfiguration->openPatch(0);
 }
 
 MainWindow::~MainWindow() {

@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QGridLayout>
+#include <QSpinBox>
+#include <QLineEdit>
 #include <vector>
 
 #include "patch.h"
@@ -23,6 +25,8 @@ private:
     ADSRWidget  *adsrWidget;
     TimbreWidget *internalTimbre;
     TimbreWidget *externalTimbre;
+    QSpinBox     *patchSelectSpinBox;
+    QLineEdit    *patchNameEdit;
 
     std::vector<Patch> patchConfiguration;
 
@@ -36,6 +40,7 @@ public slots:
     void setExternalTimbre(QVector<double> &amplitudes,
                            QVector<double> &coefficients);
     void envelopeChanged(Envelope &envelope);
+    void openPatch(int patchNumber);
 signals:
     void setPatch(unsigned int MIDIChannel,
                   const Patch &patch);

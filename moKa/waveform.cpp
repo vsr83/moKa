@@ -56,6 +56,8 @@ Waveform::Waveform(unsigned int _mode,
     tableSizeFloat = (double)_tableSize;
     timeAtTrigger = 0.0;
     fundamentalFrequency = _fundamentalFrequency;
+    timbreAmplitudes = {1.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0};
+    timbreCoefficients = {1.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0};
 
     if (mode == MODE_WAV) {
         waveTable = waveform;
@@ -84,9 +86,22 @@ Waveform::Waveform(unsigned int _mode,
 }
 
 void
-Waveform::recreateWithTimbre(std::vector<double> &timbreAmplitudes,
-                             std::vector<double> &timbreCoefficients) {
-    assert(timbreAmplitudes.size() == timbreCoefficients.size());
+Waveform::getTimbre(std::vector<double> &_timbreAmplitudes,
+                    std::vector<double> &_timbreCoefficients) {
+    std::cout << "getTimbre" <<timbreAmplitudes.size() << std::endl;
+
+    _timbreAmplitudes = timbreAmplitudes;
+    _timbreCoefficients = timbreCoefficients;
+}
+
+
+void
+Waveform::recreateWithTimbre(std::vector<double> &_timbreAmplitudes,
+                             std::vector<double> &_timbreCoefficients) {
+    assert(_timbreAmplitudes.size() == _timbreCoefficients.size());
+
+    timbreAmplitudes   = _timbreAmplitudes;
+    timbreCoefficients = _timbreCoefficients;
 
     for (unsigned int indSample; indSample < tableSize; indSample++)
         waveTable[indSample] = 0.0;
@@ -128,6 +143,8 @@ Waveform::Waveform(const Waveform &waveform) {
     tableSizeFloat = waveform.tableSizeFloat;
     tableSize = waveform.tableSize;
     mode = waveform.mode;
+    timbreAmplitudes = waveform.timbreAmplitudes;
+    timbreCoefficients = waveform.timbreCoefficients;
 
     if (mode == MODE_WAV) {
         waveTable = waveform.waveTable;
@@ -146,6 +163,8 @@ Waveform::operator=(const Waveform &other) {
     tableSizeFloat = other.tableSizeFloat;
     tableSize = other.tableSize;
     mode = other.mode;
+    timbreAmplitudes = other.timbreAmplitudes;
+    timbreCoefficients = other.timbreCoefficients;
 
     if (mode == MODE_WAV) {
         waveTable = other.waveTable;
