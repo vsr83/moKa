@@ -86,10 +86,18 @@ TimbreWidget::updateValues() {
         detuneDials[harm]->blockSignals(true);
         detuneDials[harm]->setValue(detuneDoubleInt(detuneCoeff));
         detuneDials[harm]->blockSignals(false);
+    }
+    updateLabels();
+}
 
+void
+TimbreWidget::updateLabels() {
+    for (int harm = 0; harm < numHarmonics; harm++) {
+        double detuneCoeff = coefficients[harm] - round(coefficients[harm]);
         coefficientLabels[harm]->setText(QString::number(round(coefficients[harm])));
         detuneLabels[harm]->setText(QString::number(detuneDials[harm]->value()));
     }
+
 }
 
 void
@@ -106,6 +114,7 @@ TimbreWidget::valueChanged(int tmp) {
         coefficients.push_back(coeff);
     }
     emit settingsChanged(amplitudes, coefficients);
+    updateLabels();
     Q_UNUSED(tmp);
 }
 

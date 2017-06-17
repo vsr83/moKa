@@ -34,7 +34,10 @@ SOURCES += main.cpp\
     kbWidget.cpp \
     reverbwidget.cpp \
     midiconfiguration.cpp \
-    patchconfiguration.cpp
+    patchconfiguration.cpp \
+    adsrwidget.cpp \
+    adsrplot.cpp \
+    timbrewidget.cpp
 
 HEADERS  += mainwindow.h \
     patch.h \
@@ -56,7 +59,10 @@ HEADERS  += mainwindow.h \
     kbWidget.h \
     reverbwidget.h \
     midiconfiguration.h \
-    patchconfiguration.h
+    patchconfiguration.h \
+    adsrwidget.h \
+    adsrplot.h \
+    timbrewidget.h
 
 DISTFILES += \
     README.md

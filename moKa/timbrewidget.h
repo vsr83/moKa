@@ -23,6 +23,7 @@ public:
 public slots:
     void reset();
     void updateValues();
+    void updateLabels();
 
     void setDetuneRange  (double _detuneMin,
                           double _detuneMax);
